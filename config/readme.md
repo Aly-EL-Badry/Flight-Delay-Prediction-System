@@ -1,1 +1,0 @@
-# Our Global variables
