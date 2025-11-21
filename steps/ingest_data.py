@@ -9,7 +9,24 @@ def ingest_flights_step(flights_path: str) -> pd.DataFrame:
     """Ingest flights data."""
     try:
         logging.info(f" Reading flights data from: {flights_path}")
-        flights= pd.read_csv(flights_path)
+        # Read with low_memory=False to avoid mixed-type inference and
+        # coerce airport identifier columns to strings to prevent Parquet
+        # conversion errors later (pyarrow expects bytes for object cols).
+        flights = pd.read_csv(
+            flights_path,
+            low_memory=False,
+            dtype={
+                # ensure airport codes are strings even if some rows are numeric
+                "ORIGIN_AIRPORT": str,
+                "DESTINATION_AIRPORT": str,
+            },
+        )
+
+        # As a safeguard, explicitly convert these columns to string if present
+        for col in ["ORIGIN_AIRPORT", "DESTINATION_AIRPORT"]:
+            if col in flights.columns:
+                flights[col] = flights[col].astype(str)
+
         mlflow.log_artifact(flights_path)
         logging.info(f" Flights data shape: {flights.shape}")
         return flights
