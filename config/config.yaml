@@ -1,0 +1,42 @@
+ColumnsToRemove:
+  # Columns that has null value more than 70%
+  NullColumns:
+    - 'CANCELLATION_REASON'
+    - "AIR_SYSTEM_DELAY"
+    - "SECURITY_DELAY"
+    - "AIRLINE_DELAY"
+    - "LATE_AIRCRAFT_DELAY"
+    - "WEATHER_DELAY"
+  
+  # Id Columns
+  UniqueColumns:
+    - "FLIGHT_NUMBER" 
+    - "TAIL_NUMBER" 
+
+  # Columns with one value for all the rows
+  NoValueColumns:
+    - "CANCELLED"
+    - "DIVERTED"
+    - "YEAR"
+  
+  # conclosions from the target
+  Targets:
+    - "ELAPSED_TIME"
+    - "AIR_TIME"
+    - "WHEELS_ON"
+    - "WHEELS_OFF"
+    - "TAXI_IN" 
+    - "TAXI_OUT"
+    - "ARRIVAL_TIME"
+  
+  # Columns representing time information
+  TimeColumns:
+    - "SCHEDULED_ARRIVAL"
+    - "SCHEDULED_DEPARTURE"
+    - "DEPARTURE_TIME"
+    - "ARRIVAL_TIME"
+
+# Columns To remove null from
+CleaningColumns:
+  - "DEPARTURE_DELAY"
+  - "ARRIVAL_DELAY"
