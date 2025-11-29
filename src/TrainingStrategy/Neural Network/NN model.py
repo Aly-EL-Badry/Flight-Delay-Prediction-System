@@ -78,6 +78,17 @@ class KerasRegressor(BaseModel):
         return self.model.predict(x, **predict_kwargs)
 
     def save(self, path: str, metadata: Optional[Dict[str, Any]] = None) -> None:
+        """
+        Persist model artifact and optional metadata to path (atomic).
+
+        Parameters
+        ----------
+        path : str
+            File path to save metadata.
+        metadata : Optional[Dict[str, Any]]
+            Optional metadata to save alongside the model artifact.
+        """
+
         os.makedirs(path, exist_ok=True)
 
         # save model
