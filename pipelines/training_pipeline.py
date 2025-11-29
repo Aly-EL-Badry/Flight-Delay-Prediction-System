@@ -1,11 +1,11 @@
 import logging
 from zenml import pipeline
-from steps.ingest_data import (
+from steps.DataIngestion import (
     ingest_flights_step,
     ingest_airports_step,
     ingest_airlines_step
 )
-from steps.clean_data import clean__df
+from steps.DataHandling import clean__df
 from steps.train_model_step import train_model_step
 from steps.evaluation import evaluate_model_step
 
