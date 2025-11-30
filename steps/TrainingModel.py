@@ -1,5 +1,5 @@
 import logging 
-from ..src.TrainingStrategy.NeuralNetwork.NN import KerasRegressor
+from src.TrainingStrategy.NeuralNetwork.NN import KerasRegressor
 
 from zenml import step
 import numpy as np

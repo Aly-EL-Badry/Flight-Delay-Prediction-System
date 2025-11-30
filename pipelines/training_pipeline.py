@@ -1,9 +1,9 @@
 from zenml import pipeline
-from ..steps.DataIngestion import data_ingestion_step
-from ..steps.DataHandling import DataCleaning, SpiltStep, fitPreprocessingPipeline, applyPreprocessingPipeline
-from ..steps.TrainingModel import trainModel, saveModel, predict
-from ..steps.Evalution import evaluateModel, saveMetrics
-from ..src.TrainingStrategy.NeuralNetwork.NN import KerasRegressor
+
+from steps.DataIngestion import data_ingestion_step
+from steps.DataHandling import DataCleaning, SpiltStep, fitPreprocessingPipeline, applyPreprocessingPipeline
+from steps.TrainingModel import trainModel, saveModel, predict
+from steps.Evalution import evaluateModel, saveMetrics
 
 @pipeline()
 def TrainingPipeline(configData):
@@ -19,7 +19,7 @@ def TrainingPipeline(configData):
         None
     """
     # Ingest data
-    raw_data = data_ingestion_step()
+    raw_data = data_ingestion_step(configData['DATA_PATH'])
 
     # Clean data
     DropColsSet = configData["ColumnsToRemove"]
@@ -51,7 +51,7 @@ def TrainingPipeline(configData):
     trainedModel = trainModel(
         xTrain=X_train_processed,
         yTrain=y_train,
-        modelParams=configData["ModelParams"],
+        modelParams=configData["modelParams"],
         compileParams=configData["compileParams"],
         fitParams=configData["fitParams"]
     )

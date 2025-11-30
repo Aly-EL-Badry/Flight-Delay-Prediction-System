@@ -1,3 +1,6 @@
+DATA_PATH: "data/raw/flights.csv"
+
+
 ColumnsToRemove:
   # Columns that has null value more than 70%
   NullColumns:

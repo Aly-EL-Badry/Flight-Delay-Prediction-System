@@ -1,11 +1,11 @@
 # Cleaning Lib
-from ..src.CleaningStrategy.base import CleaningStrategy
-from ..src.CleaningStrategy.DropStrategy.Columns import DropColumnsStrategy
-from ..src.CleaningStrategy.DropStrategy.InvalidValue import RemoveNumericAirportCodes
-from ..src.CleaningStrategy.DropStrategy.Nulls import DropNullsStrategy
+from src.CleaningStrategy.base import CleaningStrategy
+from src.CleaningStrategy.DropStrategy.Columns import DropColumnsStrategy
+from src.CleaningStrategy.DropStrategy.InvalidValue import RemoveNumericAirportCodes
+from src.CleaningStrategy.DropStrategy.Nulls import DropNullsStrategy
 
 # processing Pipeline
-from ..src.FeatureEngStrategy.ProcessingPipeline import PreprocessingPipeline
+from src.FeatureEngStrategy.ProcessingPipeline import PreprocessingPipeline
 
 from sklearn.model_selection import train_test_split
 from typing import List, Tuple

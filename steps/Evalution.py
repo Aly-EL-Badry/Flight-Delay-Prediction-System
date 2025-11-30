@@ -1,8 +1,8 @@
 from zenml import step
 import numpy as np
 from typing import Dict
-from ..src.EvalutionStrategy.R2.R2Strategy import R2Evaluator
-from ..src.EvalutionStrategy.Regression.RegressionEvalutor import RegressionEvaluator
+from src.EvalutionStrategy.R2.R2Strategy import R2Evaluator
+from src.EvalutionStrategy.Regression.RegressionEvalutor import RegressionEvaluator
 import json
 
 
