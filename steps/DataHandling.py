@@ -43,10 +43,10 @@ def DataCleaning(data : pd.DataFrame, dropColumns : List[str]) -> pd.DataFrame :
 
 @step
 def fitPreprocessingPipeline(
-    X_train: pd.DataFrame,
-    label_cols: list,
-    ohe_cols: list,
-    scale_cols: list,
+    data: pd.DataFrame,
+    LabelCols: list,
+    OheCols: list,
+    ScaleCols: list,
     PATH: str
 ) -> PreprocessingPipeline:
     """
@@ -64,10 +64,10 @@ def fitPreprocessingPipeline(
     try: 
         logger.info("start training the pipeline")
 
-        pipeline = PreprocessingPipeline(label_cols, ohe_cols, scale_cols)
-        pipeline.fit(X_train)
+        pipeline = PreprocessingPipeline(LabelCols, OheCols, ScaleCols)
+        pipeline.fit(data)
         pipeline.Save(PATH)
-        
+
         logger.info("End training the pipeline")
         return pipeline
     except Exception as e:
@@ -93,7 +93,7 @@ def applyPreprocessingPipeline(
 
 
 @step
-def split_step(
+def SpiltStep(
     data: pd.DataFrame,
     target: str = "weather",
     test_size: float = 0.2,
@@ -122,6 +122,7 @@ def split_step(
         X_train, X_test, y_train, y_test = train_test_split(
             X, y, test_size=test_size, random_state=random_state
         )
+
         # save the data of the test in a test file 
         test_data_path = os.path.join("data", "test", "test_data.csv")
         os.makedirs(os.path.dirname(test_data_path), exist_ok=True)
