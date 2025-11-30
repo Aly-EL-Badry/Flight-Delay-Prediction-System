@@ -1,15 +1,12 @@
-from pipelines.flight_pipeline import flight_delay_pipeline
+from .pipelines.training_pipeline import TrainingPipeline
+import yaml
+
+def load_config(path="config.yaml"):
+    with open(path, "r") as f:
+        return yaml.safe_load(f)
+
 
 if __name__ == "__main__":
-    flights_path = "data/flights.csv"
-    airlines_path = "data/airlines.csv"
-    airports_path = "data/airports.csv"
-
-    pipeline_instance = flight_delay_pipeline(
-        flights_path=flights_path,
-        airlines_path=airlines_path,
-        airports_path=airports_path,
-    )
-
-    # Run pipeline
+    config = load_config()
+    pipeline_instance = TrainingPipeline(config)
     pipeline_instance.run()

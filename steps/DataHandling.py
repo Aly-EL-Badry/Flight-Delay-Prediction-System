@@ -19,7 +19,7 @@ logger.setLevel(logging.INFO)
 
 
 @step()
-def DataCleaning(data : pd.DataFrame, dropColumns : List[str]) -> pd.DataFrame :
+def DataCleaning(data : pd.DataFrame, dropColumns : List[str], ColsToClean: List[str]) -> pd.DataFrame :
     try:
         CleaningStr = CleaningStrategy()
         logger.info("start Cleaning Data")
@@ -31,7 +31,7 @@ def DataCleaning(data : pd.DataFrame, dropColumns : List[str]) -> pd.DataFrame :
         CleaningStr = RemoveNumericAirportCodes()
         DroppedColumnData = CleaningStr.handle_data(DroppedColumnData)
 
-        CleaningStr = DropNullsStrategy()
+        CleaningStr = DropNullsStrategy(ColsToClean)
         CleanedData = CleaningStr.handle_data(DroppedColumnData)
 
         logger.info("end Cleaning Data")
@@ -47,16 +47,19 @@ def fitPreprocessingPipeline(
     LabelCols: list,
     OheCols: list,
     ScaleCols: list,
+    CycleCols: list,
     PATH: str
 ) -> PreprocessingPipeline:
     """
     Fit the preprocessing pipeline to the training data.
 
     Args:
-        X_train (pd.DataFrame): Training data
-        label_cols (list): Columns to be label encoded
-        ohe_cols (list): Columns to be one-hot encoded
-        scale_cols (list): Columns to be scaled
+        data (pd.DataFrame): Training data
+        LabelCols (list): Columns to be label encoded
+        OheCols (list): Columns to be one-hot encoded
+        ScaleCols (list): Columns to be scaled
+        CycleCols (list): Columns to be CycleScale
+        PATH (str) : to save the pipeline
 
     Returns:
         PreprocessingPipeline: The fitted preprocessing pipeline
@@ -64,7 +67,7 @@ def fitPreprocessingPipeline(
     try: 
         logger.info("start training the pipeline")
 
-        pipeline = PreprocessingPipeline(LabelCols, OheCols, ScaleCols)
+        pipeline = PreprocessingPipeline(LabelCols, OheCols, ScaleCols, CycleCols)
         pipeline.fit(data)
         pipeline.Save(PATH)
 

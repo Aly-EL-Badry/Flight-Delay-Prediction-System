@@ -3,6 +3,7 @@ import numpy as np
 from typing import Dict
 from ..src.EvalutionStrategy.R2.R2Strategy import R2Evaluator
 from ..src.EvalutionStrategy.Regression.RegressionEvalutor import RegressionEvaluator
+import json
 
 
 @step
@@ -31,3 +32,12 @@ def evaluateModel(
     merged = {k: float(v) for k, v in merged.items()}
 
     return merged
+
+@step
+def saveMetrics(metrics: Dict[str, float], savePath: str) -> str:
+    import os
+    os.makedirs(savePath, exist_ok=True)
+    path = f"{savePath}/metrics.json"
+    with open(path, "w") as f:
+        json.dump(metrics, f, indent=4)
+    

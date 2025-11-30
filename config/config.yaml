@@ -40,3 +40,50 @@ ColumnsToRemove:
 CleaningColumns:
   - "DEPARTURE_DELAY"
   - "ARRIVAL_DELAY"
+
+Target: "ARRIVAL_DELAY"
+
+FeatureEngCols:
+  OheCols:
+    - "AIRLINE"
+
+  LabelCols:
+    - "ORIGIN_AIRPORT"
+    - "DESTINATION_AIRPORT"
+  
+  CyclicCols:
+    - "MONTH"
+    - "DAY"
+    - "DAY_OF_WEEK"
+  
+  ScaleCols:
+    - "SCHEDULED_TIME"
+    - "DEPARTURE_DELAY"
+    - "DISTANCE"
+
+ProcessingPipelinePath: "../artifacts/pipelines/"
+
+modelParams:
+  hidden_units: [256, 128, 64]
+  dropout_rates: [0.0, 0.05, 0.05]
+  activation: swish
+  batch_norm: true
+  learning_rate: 0.0003
+
+compileParams:
+  optimizer:
+    type: "Adam"
+    lr: 0.0003
+
+  loss: "mae"
+  metrics:
+    - "mse"
+    - "mae"
+
+fitParams:
+  epochs: 30
+  batch_size: 1024
+
+ModelSavePath: "../artifacts/models/"
+
+ResultsPath: "../artifacts/results"

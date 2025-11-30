@@ -22,10 +22,19 @@ def trainModel(
 
     model = KerasRegressor(**modelParams)
 
-    model.build(input_shape=xTrain.shape[1])
+    model.build(input_shape=(xTrain.shape[1],))
 
     model.compile(compileParams)
 
     model.fit(xTrain, yTrain, **fitParams)
 
     return model
+
+@step
+def predict(model: KerasRegressor, xTest: np.ndarray) -> np.ndarray:
+    preds = model.predict(xTest)
+    return preds
+
+@step
+def saveModel(model: KerasRegressor, savePath: str) -> str:
+    model.save(savePath)
