@@ -1,6 +1,6 @@
 from zenml import pipeline
 
-from steps.DataIngestion import data_ingestion_step
+from steps.DataIngestion import dataIngestionStep
 from steps.DataHandling import DataCleaning, SpiltStep, fitPreprocessingPipeline, applyPreprocessingPipeline
 from steps.TrainingModel import trainModel, saveModel, predict
 from steps.Evalution import evaluateModel, saveMetrics
@@ -19,7 +19,7 @@ def TrainingPipeline(configData):
         None
     """
     # Ingest data
-    raw_data = data_ingestion_step(configData['DATA_PATH'])
+    raw_data = dataIngestionStep(configData['DATA_PATH'])
 
     # Clean data
     DropColsSet = configData["ColumnsToRemove"]

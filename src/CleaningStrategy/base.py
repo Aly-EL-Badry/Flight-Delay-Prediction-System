@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 import pandas as pd
 class CleaningStrategy(ABC):
-    def __init__(self, columns):
+    def __init__(self, columns: list = None):
         """
         Initializes the CleaningStrategy base class.
         """

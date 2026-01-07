@@ -1,10 +1,9 @@
-# Cleaning Lib
-from src.CleaningStrategy.base import CleaningStrategy
+# cleaning_pipeline_steps_minimal_mlflow.py
+from src.CleaningStrategy.base import CleaningStrategy  # abstract parent (not instantiated)
 from src.CleaningStrategy.DropStrategy.Columns import DropColumnsStrategy
 from src.CleaningStrategy.DropStrategy.InvalidValue import RemoveNumericAirportCodes
 from src.CleaningStrategy.DropStrategy.Nulls import DropNullsStrategy
 
-# processing Pipeline
 from src.FeatureEngStrategy.ProcessingPipeline import PreprocessingPipeline
 
 from sklearn.model_selection import train_test_split
@@ -13,33 +12,47 @@ from zenml import step
 import pandas as pd
 import logging
 import os
+import mlflow
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
 @step()
-def DataCleaning(data : pd.DataFrame, dropColumns : List[str], ColsToClean: List[str]) -> pd.DataFrame :
+def DataCleaning(data: pd.DataFrame, dropColumns: List[str], ColsToClean: List[str]) -> pd.DataFrame:
+    """
+    Minimal MLflow logging:
+      - input rows/cols
+      - final cleaned rows/cols
+    No start/end run here.
+    """
     try:
-        CleaningStr = CleaningStrategy()
-        logger.info("start Cleaning Data")
-    
+        mlflow.log_param("data_input_rows", int(data.shape[0]))
+        mlflow.log_param("data_input_cols", int(data.shape[1]))
 
-        CleaningStr = DropColumnsStrategy(dropColumns)
-        DroppedColumnData = CleaningStr.handle_data(data)
+        # apply concrete child strategies sequentially
+        strategies: List[CleaningStrategy] = [
+            DropColumnsStrategy(dropColumns),
+            RemoveNumericAirportCodes(),
+            DropNullsStrategy(ColsToClean)
+        ]
 
-        CleaningStr = RemoveNumericAirportCodes()
-        DroppedColumnData = CleaningStr.handle_data(DroppedColumnData)
+        cleaned = data
+        for strat in strategies:
+            cleaned = strat.handle_data(cleaned)
 
-        CleaningStr = DropNullsStrategy(ColsToClean)
-        CleanedData = CleaningStr.handle_data(DroppedColumnData)
 
-        logger.info("end Cleaning Data")
+        mlflow.log_metric("data_cleaned_rows", int(cleaned.shape[0]))
+        mlflow.log_metric("data_cleaned_cols", int(cleaned.shape[1]))
 
-        return CleanedData
+        return cleaned
+
     except Exception as e:
-        logger.error(f"Error cleaning data: {e}")
+        logger.exception("Error in DataCleaning: %s", e)
+        if mlflow.active_run() is not None:
+            mlflow.set_tag("error.DataCleaning", str(e))
         raise
+
 
 @step
 def fitPreprocessingPipeline(
@@ -51,30 +64,42 @@ def fitPreprocessingPipeline(
     PATH: str
 ) -> PreprocessingPipeline:
     """
-    Fit the preprocessing pipeline to the training data.
-
-    Args:
-        data (pd.DataFrame): Training data
-        LabelCols (list): Columns to be label encoded
-        OheCols (list): Columns to be one-hot encoded
-        ScaleCols (list): Columns to be scaled
-        CycleCols (list): Columns to be CycleScale
-        PATH (str) : to save the pipeline
-
-    Returns:
-        PreprocessingPipeline: The fitted preprocessing pipeline
+    Fit and save preprocessing pipeline.
+    Minimal MLflow logging:
+      - counts of column groups
+      - logs pipeline artifact if saved
     """
-    try: 
-        logger.info("start training the pipeline")
+    try:
+
+        mlflow.log_param("n_LabelCols", len(LabelCols) if LabelCols else 0)
+        mlflow.log_param("n_OheCols", len(OheCols) if OheCols else 0)
+        mlflow.log_param("n_ScaleCols", len(ScaleCols) if ScaleCols else 0)
+        mlflow.log_param("n_CycleCols", len(CycleCols) if CycleCols else 0)
 
         pipeline = PreprocessingPipeline(LabelCols, OheCols, ScaleCols, CycleCols)
+        logger.info("start fitting pipeline")
         pipeline.fit(data)
-        pipeline.Save(PATH)
+        logger.info("end fitting pipeline")
 
-        logger.info("End training the pipeline")
+        logger.info("start saving the pipeline")
+        os.makedirs(os.path.dirname(PATH), exist_ok=True)
+        pipeline.Save(PATH)
+        logger.info("end saving the pipeline")
+
+
+        try:
+            mlflow.log_artifact(PATH, artifact_path="preprocessing_pipeline")
+        except Exception as e:
+            logger.warning("Failed to log pipeline artifact: %s", e)
+
         return pipeline
+
     except Exception as e:
-        logger.error(f"Error in Processing: {e}")
+        logger.exception("Error in fitPreprocessingPipeline: %s", e)
+        if mlflow.active_run() is not None:
+            mlflow.set_tag("error.fitPreprocessingPipeline", str(e))
+        raise
+
 
 @step
 def applyPreprocessingPipeline(
@@ -82,17 +107,21 @@ def applyPreprocessingPipeline(
     data: pd.DataFrame
 ) -> pd.DataFrame:
     """
-    Applies the preprocessing pipeline to the given data.
-
-    Args:
-        pipeline (PreprocessingPipeline): The preprocessing pipeline to apply.
-        data (pd.DataFrame): The data to preprocess.
-
-    Returns:
-        pd.DataFrame: The preprocessed data.
+    Apply pipeline and log only processed row count (minimal).
     """
-    dataProcessed = pipeline.transform(data)
-    return dataProcessed
+    try:
+        logger.info("start transforming data")
+        processed = pipeline.transform(data)
+        logger.info("ended transforming data")
+
+        mlflow.log_metric("processed_rows", int(processed.shape[0]))
+
+        return processed
+
+    except Exception as e:
+        logger.exception("Error in applyPreprocessingPipeline: %s", e)
+        mlflow.set_tag("error.applyPreprocessingPipeline", str(e))
+        raise
 
 
 @step
@@ -103,22 +132,11 @@ def SpiltStep(
     random_state: int = 42
 ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
     """
-    Splits a given dataset into training and test sets using train_test_split.
-    
-    Args:
-        data (pd.DataFrame): The dataset to split.
-        target (str, optional): The target column name. Defaults to "weather".
-        test_size (float, optional): The proportion of the dataset to include in the test split.
-            Defaults to 0.2.
-        random_state (int, optional): Controls the shuffling applied to the data before applying the split.
-            Defaults to 42.
-    
-    Returns:
-        Tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]: A tuple containing the training data, test data, 
-        training labels, and test labels.
+    Minimal logging:
+      - train/test sizes (rows)
+      - saves test CSV and logs it as one artifact
     """
     try:
-        logger.info(f"Splitting data with test_size={test_size}")
         X = data.drop(columns=[target])
         y = data[target]
 
@@ -126,16 +144,20 @@ def SpiltStep(
             X, y, test_size=test_size, random_state=random_state
         )
 
-        # save the data of the test in a test file 
         test_data_path = os.path.join("data", "test", "test_data.csv")
         os.makedirs(os.path.dirname(test_data_path), exist_ok=True)
         pd.concat([X_test, y_test], axis=1).to_csv(test_data_path, index=False)
-        
-        logger.info(f"Train shape: {X_train.shape}, Test shape: {X_test.shape}")
+
+        mlflow.log_metric("train_rows", int(X_train.shape[0]))
+        mlflow.log_metric("test_rows", int(X_test.shape[0]))
+        try:
+            mlflow.log_artifact(test_data_path, artifact_path="splits")
+        except Exception as e:
+            logger.warning("Failed to log test CSV: %s", e)
+
         return X_train, X_test, y_train, y_test
+
     except Exception as e:
-        logger.error(f"Error in data splitting: {e}")
+        logger.exception("Error in SpiltStep: %s", e)
+        mlflow.set_tag("error.SpiltStep", str(e))
         raise
-
-
-        
