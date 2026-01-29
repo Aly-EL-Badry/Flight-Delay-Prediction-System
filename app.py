@@ -106,6 +106,9 @@ def preprocess(data: FlightInput) -> np.ndarray:
 
     return df.values.astype("float32")
 
+@app.get("/")
+def index(request):
+    return {"message": "Welcome to the Flight Delay Prediction API!"}
 
 # ================================
 #  Prediction Endpoint
@@ -115,3 +118,5 @@ def predict_delay(flight: FlightInput):
     x = preprocess(flight)
     pred = model.predict(x)[0][0]  # single output
     return {"predicted_arrival_delay_minutes": float(pred)}
+
+
