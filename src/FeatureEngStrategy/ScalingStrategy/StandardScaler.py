@@ -18,14 +18,16 @@ class ScalingStrategy(BaseFeatureEngStrategy):
         """
         self.scaler.fit(df[self.columns])
 
-    def transform(self, df: pd.DataFrame) -> pd.DataFrame:
+    def transform(self, df: pd.DataFrame):
+        scaled_array = self.scaler.transform(df[self.columns])
         df_t = df.copy()
-        df_t[self.columns] = self.scaler.transform(df_t[self.columns])
+        df_t[self.columns] = pd.DataFrame(scaled_array, columns=self.columns, index=df.index)
         return df_t
 
     def apply(self, df: pd.DataFrame):
-        self.fit(df)
+        df = self.fit(df)
         return self.transform(df)
+
 
     def save(self, save_path: str):
         payload = {

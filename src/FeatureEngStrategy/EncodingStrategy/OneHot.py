@@ -43,6 +43,7 @@ class OneHotEncodingStrategy(BaseFeatureEngStrategy):
 
                 df_encoded.drop(columns=[col], inplace=True)
 
+            print(df_encoded.shape)
             return df_encoded
         except Exception as e:
             raise Exception(f"Error transforming with One-Hot Encoder: {e}")

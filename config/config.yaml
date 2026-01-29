@@ -64,7 +64,7 @@ FeatureEngCols:
     - "DEPARTURE_DELAY"
     - "DISTANCE"
 
-ProcessingPipelinePath: "artifacts/pipelines/"
+ProcessingPipelinePath: "/artifacts/pipelines/processing_pipeline.pkl"
 
 modelParams:
   hidden_units: [256, 128, 64]

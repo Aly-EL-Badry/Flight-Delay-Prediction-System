@@ -27,39 +27,47 @@ class PreprocessingPipeline:
     def fit(self, X: pd.DataFrame) -> pd.DataFrame:
         logger.info("Start Label encoder")
         if self.LabelCols:
-            X[self.LabelCols] = self.LabelEncoder.apply(X[self.LabelCols])
+            self.LabelEncoder.fit(X[self.LabelCols])
         logger.info("finish Label encoder")
 
         logger.info("Start one hot encoder ")
         if self.OheCols:
-            X = self.OheEncoder.apply(X)  # Should return one-pass transformed DataFrame
+            self.OheEncoder.fit(X[self.OheCols])  # Should return one-pass transformed DataFrame
         logger.info("finish one hot encoder")
 
         logger.info("Start scale encoder")
         if self.ScaleCols:
-            X[self.ScaleCols] = self.Scaler.apply(X[self.ScaleCols])
+            self.Scaler.fit(X[self.ScaleCols])
         logger.info("finish scale encoder")
 
 
         logger.info("start cyclic encoder")
         if self.CyclicCols:
-            X = self.Cyclic.apply(X)
+            self.Cyclic.fit(X[self.CyclicCols])
         logger.info("finish cyclic encoder")
-        return X
 
     def transform(self, X: pd.DataFrame) -> pd.DataFrame:
         # Transform in-place where possible to avoid extra copies
+        print(X.shape)
+        print("Transforming data using label encoding")
         if self.LabelCols:
             X[self.LabelCols] = self.LabelEncoder.transform(X[self.LabelCols])
+            print("Shape after label encoding:", X.shape)
         
+        print("Transforming data using one-hot encoding")
         if self.OheCols:
             X = self.OheEncoder.transform(X)
+        print("Shape after label encoding:", X.shape)
 
+        print("Transforming data using scaling")
         if self.ScaleCols:
-            X[self.ScaleCols] = self.Scaler.transform(X[self.ScaleCols].values)
+            scaled_array = self.Scaler.transform(X[self.ScaleCols])
+            X[self.ScaleCols] = pd.DataFrame(scaled_array, columns=self.ScaleCols, index=X.index)
+        print("Shape after label encoding:", X.shape)
 
+        print("Transforming data using cyclic encoding")
         if self.CyclicCols:
-            X[self.CyclicCols] = self.Cyclic.transform(X[self.CyclicCols])
+            X = self.Cyclic.transform(X)
 
         return X
 

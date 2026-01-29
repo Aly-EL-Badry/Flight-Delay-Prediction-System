@@ -12,7 +12,7 @@ app = FastAPI(title="Flight Delay Prediction API")
 # ================================
 #  Load model and scaler
 # ================================
-MODEL_PATH = Path(r"E:\MLOPS\flight_api\model\flight_delay_model.keras")
+MODEL_PATH = Path("artifcts/model/flight_delay_model.keras")
 
 SCALER_PATH = Path("model/scaler.pkl")
 BASE_DIR = Path(__file__).resolve().parent

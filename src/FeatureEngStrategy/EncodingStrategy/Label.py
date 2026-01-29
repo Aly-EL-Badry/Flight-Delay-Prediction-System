@@ -19,16 +19,14 @@ class LabelEncodingStrategy(BaseFeatureEngStrategy):
 
         for col in self.columns:
             encoder = self.encoders[col]
-            classes_set = set(encoder.classes_)
-
-            # vectorized safe transform
-            col_values = df_encoded[col].astype(str).to_numpy()
-            mask_known = np.isin(col_values, encoder.classes_)
-            transformed = np.full_like(col_values, -1, dtype=int)
-            transformed[mask_known] = encoder.transform(col_values[mask_known])
-            df_encoded[col] = transformed
+            values = df_encoded[col].astype(str).values
+            encoded = np.full(values.shape[0], -1, dtype=int)
+            known_mask = np.isin(values, encoder.classes_)
+            encoded[known_mask] = encoder.transform(values[known_mask])
+            df_encoded.loc[:, col] = encoded
 
         return df_encoded
+
 
     def apply(self, df: pd.DataFrame) -> pd.DataFrame:
         self.fit(df)
