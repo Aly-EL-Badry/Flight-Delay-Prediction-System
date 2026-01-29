@@ -1,12 +1,14 @@
 from fastapi import FastAPI
+from fastapi import Request
+import keras
+from pydantic import BaseModel
 from pydantic import BaseModel
 import numpy as np
 import pandas as pd
-import tensorflow as tf
 from pathlib import Path
 import joblib
 
-app = FastAPI(title="Flight Delay Prediction API")
+app = FastAPI()
 
 # ================================
 #  Load model and scaler
@@ -22,7 +24,7 @@ dest_categories   = joblib.load(BASE_DIR / "model" / "dest_categories.pkl")
 origin_map = {cat: i for i, cat in enumerate(origin_categories)}
 dest_map   = {cat: i for i, cat in enumerate(dest_categories)}
 
-model = tf.keras.models.load_model(MODEL_PATH)
+model = keras.models.load_model(MODEL_PATH)
 scaler = joblib.load(SCALER_PATH)
 
 # ================================
@@ -107,7 +109,7 @@ def preprocess(data: FlightInput) -> np.ndarray:
     return df.values.astype("float32")
 
 @app.get("/")
-def index(request):
+def root():
     return {"message": "Welcome to the Flight Delay Prediction API!"}
 
 # ================================
@@ -118,5 +120,3 @@ def predict_delay(flight: FlightInput):
     x = preprocess(flight)
     pred = model.predict(x)[0][0]  # single output
     return {"predicted_arrival_delay_minutes": float(pred)}
-
-

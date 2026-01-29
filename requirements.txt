@@ -1,6 +1,6 @@
 fastapi
 uvicorn
-tensorflow
+keras
 numpy
 pandas
 joblib
