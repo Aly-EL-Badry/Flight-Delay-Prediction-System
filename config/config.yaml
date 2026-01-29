@@ -75,8 +75,9 @@ modelParams:
 
 compileParams:
   optimizer:
-    type: "Adam"
-    lr: 0.0003
+    class_name: "Adam"
+    config:
+      learning_rate: 0.0003
 
   loss: "mae"
   metrics:
@@ -84,7 +85,7 @@ compileParams:
     - "mae"
 
 fitParams:
-  epochs: 30
+  epochs: 10
   batch_size: 1024
 
 ModelSavePath: "../artifacts/models/"

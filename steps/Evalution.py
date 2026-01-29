@@ -4,13 +4,14 @@ from typing import Dict
 from src.EvalutionStrategy.R2.R2Strategy import R2Evaluator
 from src.EvalutionStrategy.Regression.RegressionEvalutor import RegressionEvaluator
 import json
+import pandas as pd
 
 
 @step
 def evaluateModel(
-    yPred: np.ndarray,
-    yTest: np.ndarray
-) -> Dict[str, float]:
+    yPred: pd.Series,
+    yTest: pd.Series
+) :
     """
     Run both R2Evaluator and RegressionEvaluator and return merged metrics.
 
@@ -34,7 +35,7 @@ def evaluateModel(
     return merged
 
 @step
-def saveMetrics(metrics: Dict[str, float], savePath: str) -> str:
+def saveMetrics(metrics: Dict[str, float], savePath: str) :
     import os
     os.makedirs(savePath, exist_ok=True)
     path = f"{savePath}/metrics.json"

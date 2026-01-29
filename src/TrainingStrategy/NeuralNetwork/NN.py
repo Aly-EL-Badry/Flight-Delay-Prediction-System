@@ -79,33 +79,47 @@ class KerasRegressor(BaseModel):
 
     def save(self, path: str, metadata: Optional[Dict[str, Any]] = None) -> None:
         """
-        Persist model artifact and optional metadata to path (atomic).
-
-        Parameters
-        ----------
-        path : str
-            File path to save metadata.
-        metadata : Optional[Dict[str, Any]]
-            Optional metadata to save alongside the model artifact.
+        Persist model artifact and optional metadata to path.
         """
+
+        if self.model is None:
+            raise RuntimeError("Cannot save: model is not built or trained.")
+
+        path = os.path.abspath(path)
 
         os.makedirs(path, exist_ok=True)
 
-        # save model
-        self.model.save(os.path.join(path, "model.keras"))
+        model_path = os.path.join(path, "model.keras")
+        meta_path = os.path.join(path, "meta.json")
 
-        # save metadata + hyperparams
+        self.model.save(model_path)
+
+        if not os.path.exists(model_path):
+            raise RuntimeError("model.keras was NOT created!")
+
         meta = {"hyperparams": self.hyperparams}
         if metadata:
             meta["metadata"] = metadata
 
-        with open(os.path.join(path, "meta.json"), "w") as f:
-            json.dump(meta, f)
-
+        with open(meta_path, "w") as f:
+            json.dump(meta, f, indent=2)
+            
     def load(self, path: str) -> None:
-        self.model = keras.models.load_model(os.path.join(path, "model.keras"))
+        """
+        Load model artifact and metadata from path.
+        """
 
+        path = os.path.abspath(path)
+
+        model_path = os.path.join(path, "model.keras")
         meta_path = os.path.join(path, "meta.json")
+
+        if not os.path.exists(model_path):
+            raise FileNotFoundError(f"Model file not found: {model_path}")
+
+        self.model = keras.models.load_model(model_path)
+
         if os.path.exists(meta_path):
             with open(meta_path, "r") as f:
-                self.hyperparams = json.load(f)["hyperparams"]
+                self.hyperparams = json.load(f).get("hyperparams", {})
+

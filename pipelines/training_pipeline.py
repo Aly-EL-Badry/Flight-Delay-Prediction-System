@@ -2,7 +2,7 @@ from zenml import pipeline
 
 from steps.DataIngestion import dataIngestionStep
 from steps.DataHandling import DataCleaning, SpiltStep, fitPreprocessingPipeline, applyPreprocessingPipeline
-from steps.TrainingModel import trainModel, saveModel, predict
+from steps.TrainingModel import trainModel,  predict
 from steps.Evalution import evaluateModel, saveMetrics
 
 @pipeline()
@@ -48,17 +48,16 @@ def TrainingPipeline(configData):
     X_train_processed = applyPreprocessingPipeline(data=X_train, pipeline=preprocessing_pipeline)
     X_test_processed = applyPreprocessingPipeline(data=X_test, pipeline=preprocessing_pipeline)
 
-    trainedModel = trainModel(
-        xTrain=X_train_processed,
-        yTrain=y_train,
-        modelParams=configData["modelParams"],
-        compileParams=configData["compileParams"],
-        fitParams=configData["fitParams"]
-    )
     
-    saveModel(model=trainedModel, savePath=configData["ModelSavePath"])
-
-    yPred = predict(model=trainedModel, xTest=X_test_processed)
+    # done  = trainModel(
+    #     xTrain=X_train_processed,
+    #     yTrain=y_train,
+    #     modelParams=configData["modelParams"],
+    #     compileParams=configData["compileParams"],
+    #     fitParams=configData["fitParams"]
+    # )
+    done = True
+    yPred = predict(xTest=X_test_processed, done = done)
 
     results = evaluateModel(yPred, y_test)
 
