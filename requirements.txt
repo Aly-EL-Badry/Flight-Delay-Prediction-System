@@ -1,6 +1,7 @@
 fastapi
 uvicorn
 keras
+sklearn
 tensorflow
 numpy
 pandas
