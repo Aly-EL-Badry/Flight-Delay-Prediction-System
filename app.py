@@ -5,17 +5,16 @@ import pandas as pd
 import tensorflow as tf
 from pathlib import Path
 import joblib
-import math
 
 app = FastAPI(title="Flight Delay Prediction API")
 
 # ================================
 #  Load model and scaler
 # ================================
-MODEL_PATH = Path("artifcts/model/flight_delay_model.keras")
-
-SCALER_PATH = Path("model/scaler.pkl")
 BASE_DIR = Path(__file__).resolve().parent
+
+MODEL_PATH = BASE_DIR / "model" / "flight_delay_model.keras"
+SCALER_PATH = BASE_DIR / "model" / "scaler.pkl"
 
 origin_categories = joblib.load(BASE_DIR / "model" / "origin_categories.pkl")
 dest_categories   = joblib.load(BASE_DIR / "model" / "dest_categories.pkl")
